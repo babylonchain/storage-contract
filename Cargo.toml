@@ -33,11 +33,7 @@ backtraces = ["cosmwasm-std/backtraces"]
 library = []
 
 [package.metadata.scripts]
-optimize = """docker run --rm -v "$(pwd)":/code \
-  --mount type=volume,source="$(basename "$(pwd)")_cache",target=/target \
-  --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-  cosmwasm/optimizer:0.15.0
-"""
+optimize = "./scripts/optimizer.sh"
 
 [dependencies]
 cosmwasm-schema = "1.5.0"
