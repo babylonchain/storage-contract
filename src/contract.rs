@@ -3,18 +3,16 @@ use cosmwasm_schema::cw_serde;
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 
-// use cw2::set_contract_version;
+use cw2::set_contract_version;
 use crate::error::ContractError;
 use crate::msg::{CheckDataResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
 use babylon_bindings::{BabylonQuerier, BabylonQuery};
 use cw_storage_plus::Map;
 use sha2::{Digest, Sha256};
 
-/*
-// version info for migration info
-const CONTRACT_NAME: &str = "crates.io:storage-contract";
+// Version info for migration info
+const CONTRACT_NAME: &str = "storage-contract";
 const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
-*/
 
 #[cw_serde]
 struct StoredData {
@@ -30,11 +28,13 @@ fn decode_hex(data: &str) -> Result<Vec<u8>, ContractError> {
 
 #[cfg_attr(not(feature = "library"), entry_point)]
 pub fn instantiate(
-    _deps: DepsMut<BabylonQuery>,
+    deps: DepsMut<BabylonQuery>,
     _env: Env,
     _info: MessageInfo,
     _msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
+    set_contract_version(deps.storage, CONTRACT_NAME, CONTRACT_VERSION)?;
+
     Ok(Response::default())
 }
 
