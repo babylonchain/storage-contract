@@ -1,7 +1,7 @@
 use cosmwasm_schema::cw_serde;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
-use cosmwasm_std::{Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
+use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 
 // use cw2::set_contract_version;
 use crate::error::ContractError;
@@ -77,7 +77,7 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
             let bq = BabylonQuerier::new(&deps.querier);
             let latest_finalized_epoch_info_res = bq.latest_finalized_epoch_info();
 
-            // realisticly there can be only one error here i.e there is no finalized epoch
+            // Realistically there can be only one error here i.e there is no finalized epoch
             if latest_finalized_epoch_info_res.is_err() {
                 let res = CheckDataResponse {
                     finalized: false,
@@ -85,7 +85,7 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
                     latest_finalized_epoch: 0,
                 };
 
-                return cosmwasm_std::to_json_binary(&res);
+                return to_json_binary(&res);
             }
 
             let latest_finalized_epoch_info = latest_finalized_epoch_info_res.unwrap();
@@ -95,7 +95,7 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
                 save_epoch: data.saved_epoch,
                 latest_finalized_epoch: latest_finalized_epoch_info.epoch_number,
             };
-            cosmwasm_std::to_json_binary(&res)
+            to_json_binary(&res)
         }
     }
 }
