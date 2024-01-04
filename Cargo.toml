@@ -53,4 +53,4 @@ hex = "0.4.3"
 sha2 = "0.10.6"
 
 [dev-dependencies]
-cw-multi-test = "0.16.2"
+cw-multi-test = "0.16.5"
