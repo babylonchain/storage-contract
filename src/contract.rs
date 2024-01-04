@@ -35,7 +35,7 @@ pub fn instantiate(
     _info: MessageInfo,
     _msg: InstantiateMsg,
 ) -> Result<Response, ContractError> {
-    return Ok(Response::default());
+    Ok(Response::default())
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -58,15 +58,15 @@ pub fn execute(
             let bq = BabylonQuerier::new(&deps.querier);
             let current_epoch = bq.current_epoch()?;
             let data = StoredData {
-                data: data,
+                data,
                 saved_epoch: current_epoch.u64(),
             };
 
             STORED_DATA.save(deps.storage, hash_string, &data)?;
 
-            return Ok(Response::default());
+            Ok(Response::default())
         }
-    };
+    }
 }
 
 #[cfg_attr(not(feature = "library"), entry_point)]
@@ -95,7 +95,7 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
                 save_epoch: data.saved_epoch,
                 latest_finalized_epoch: latest_finalized_epoch_info.epoch_number,
             };
-            return cosmwasm_std::to_json_binary(&res);
+            cosmwasm_std::to_json_binary(&res)
         }
     }
 }
