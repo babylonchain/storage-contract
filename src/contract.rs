@@ -1,13 +1,13 @@
-use sha2::{Digest, Sha256};
+use crate::error::ContractError;
+use crate::msg::{CheckDataResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use babylon_bindings::{BabylonQuerier, BabylonQuery};
 use cosmwasm_schema::cw_serde;
 #[cfg(not(feature = "library"))]
 use cosmwasm_std::entry_point;
 use cosmwasm_std::{to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult};
 use cw2::set_contract_version;
 use cw_storage_plus::Map;
-use babylon_bindings::{BabylonQuerier, BabylonQuery};
-use crate::error::ContractError;
-use crate::msg::{CheckDataResponse, ExecuteMsg, InstantiateMsg, QueryMsg};
+use sha2::{Digest, Sha256};
 
 // Version info for migration info
 const CONTRACT_NAME: &str = "storage-contract";

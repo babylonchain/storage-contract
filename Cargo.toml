@@ -39,14 +39,14 @@ optimize = "./scripts/optimizer.sh"
 cosmwasm-schema = "1.5.0"
 cosmwasm-std = "1.5.0"
 cosmwasm-storage = "1.5.0"
-cw-storage-plus = "1.0.1"
-cw2 = "1.0.1"
-schemars = "0.8.10"
-serde = { version = "1.0.145", default-features = false, features = ["derive"] }
-thiserror = { version = "1.0.31" }
+cw-storage-plus = "1.2.0"
+cw2 = "1.1.2"
+schemars = "0.8.16"
+serde = { version = "1.0.194", default-features = false, features = ["derive"] }
+thiserror = { version = "1.0.56" }
 babylon-bindings = {git = "https://github.com/babylonchain/bindings", tag = "v0.1.0"}
 hex = "0.4.3"
-sha2 = "0.10.6"
+sha2 = "0.10.8"
 
 [dev-dependencies]
-cw-multi-test = "0.16.5"
+cw-multi-test = "0.20.0"
