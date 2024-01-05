@@ -1,4 +1,4 @@
-:
+#!/bin/bash
 
 U="cosmwasm"
 V="0.15.0"
