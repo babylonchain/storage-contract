@@ -13,4 +13,4 @@ S=${S:+-$S}
 docker run --platform $A --rm -v "$(pwd)":/code \
   --mount type=volume,source="$(basename "$(pwd)")_cache",target=/target \
   --mount type=volume,source=registry_cache,target=/usr/local/cargo/registry \
-  $U/rust-optimizer$S:$V
+  $U/optimizer$S:$V
