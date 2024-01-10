@@ -20,6 +20,8 @@ pub enum QueryMsg {
 
 #[cw_serde]
 pub struct CheckDataResponse {
+    pub height: u64,
+    pub timestamp: u64,
     pub finalized: bool,
     pub save_epoch: u64,
     pub latest_finalized_epoch: u64,
