@@ -16,6 +16,8 @@ const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 #[cw_serde]
 struct StoredData {
     data: String,
+    height: u64,
+    timestamp: u64,
     saved_epoch: u64,
 }
 
@@ -56,8 +58,12 @@ pub fn execute(
 
             let bq = BabylonQuerier::new(&deps.querier);
             let current_epoch = bq.current_epoch()?;
+            // Add BTC timestamp info
+            let btc_tip = bq.btc_tip()?;
             let data = StoredData {
                 data,
+                height: btc_tip.height,
+                timestamp: btc_tip.header.time as u64,
                 saved_epoch: current_epoch.u64(),
             };
 
