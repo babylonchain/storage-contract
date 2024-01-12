@@ -16,6 +16,8 @@ const CONTRACT_VERSION: &str = env!("CARGO_PKG_VERSION");
 #[cw_serde]
 struct StoredData {
     data: String,
+    height: u64,
+    timestamp: u64,
     saved_epoch: u64,
 }
 
@@ -56,8 +58,12 @@ pub fn execute(
 
             let bq = BabylonQuerier::new(&deps.querier);
             let current_epoch = bq.current_epoch()?;
+            // Add BTC timestamp info
+            let btc_tip = bq.btc_tip()?;
             let data = StoredData {
                 data,
+                height: btc_tip.height,
+                timestamp: btc_tip.header.time as u64,
                 saved_epoch: current_epoch.u64(),
             };
 
@@ -79,6 +85,8 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
             // Realistically there can be only one error here i.e there is no finalized epoch
             if latest_finalized_epoch_info_res.is_err() {
                 let res = CheckDataResponse {
+                    height: 0,
+                    timestamp: 0,
                     finalized: false,
                     save_epoch: data.saved_epoch,
                     latest_finalized_epoch: 0,
@@ -90,6 +98,8 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
             let latest_finalized_epoch_info = latest_finalized_epoch_info_res.unwrap();
             let is_finalized = latest_finalized_epoch_info.epoch_number >= data.saved_epoch;
             let res = CheckDataResponse {
+                height: data.height,
+                timestamp: data.timestamp,
                 finalized: is_finalized,
                 save_epoch: data.saved_epoch,
                 latest_finalized_epoch: latest_finalized_epoch_info.epoch_number,
