@@ -83,28 +83,18 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
             let latest_finalized_epoch_info_res = bq.latest_finalized_epoch_info();
 
             // Realistically there can be only one error here i.e there is no finalized epoch
-            if latest_finalized_epoch_info_res.is_err() {
-                let res = CheckDataResponse {
-                    height: 0,
-                    timestamp: 0,
-                    finalized: false,
-                    save_epoch: data.saved_epoch,
-                    latest_finalized_epoch: 0,
-                };
+            let latest_finalized_epoch = match latest_finalized_epoch_info_res {
+                Ok(epoch_info) => epoch_info.epoch_number,
+                Err(_) => 0,
+            };
 
-                return to_json_binary(&res);
-            }
-
-            let latest_finalized_epoch_info = latest_finalized_epoch_info_res.unwrap();
-            let is_finalized = latest_finalized_epoch_info.epoch_number >= data.saved_epoch;
-            let res = CheckDataResponse {
+            to_json_binary(&CheckDataResponse {
                 height: data.height,
                 timestamp: data.timestamp,
-                finalized: is_finalized,
+                finalized: latest_finalized_epoch >= data.saved_epoch,
                 save_epoch: data.saved_epoch,
-                latest_finalized_epoch: latest_finalized_epoch_info.epoch_number,
-            };
-            to_json_binary(&res)
+                latest_finalized_epoch,
+            })
         }
     }
 }
