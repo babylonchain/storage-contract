@@ -1,5 +1,6 @@
 use crate::state::StoredData;
 use cosmwasm_schema::{cw_serde, QueryResponses};
+use cosmwasm_std::Uint64;
 
 #[cw_serde]
 pub struct InstantiateMsg {}
@@ -30,6 +31,6 @@ pub struct QueryDataMsg {
 #[cw_serde]
 pub struct DataResponse {
     pub finalized: bool,
-    pub latest_finalized_epoch: u64,
+    pub latest_finalized_epoch: Uint64,
     pub data: StoredData,
 }

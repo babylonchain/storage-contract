@@ -7,6 +7,7 @@ use crate::{
 use babylon_bindings::{BabylonQuerier, BabylonQuery};
 use cosmwasm_std::{
     entry_point, to_json_binary, Binary, Deps, DepsMut, Env, MessageInfo, Response, StdResult,
+    Uint64,
 };
 use cw2::set_contract_version;
 use sha2::{Digest, Sha256};
@@ -49,22 +50,22 @@ pub fn execute(
             // Add BTC timestamp info
             let bq = BabylonQuerier::new(&deps.querier);
             let btc_tip = bq.btc_tip()?;
-            let btc_height = btc_tip.height;
-            let btc_timestamp = btc_tip.header.time;
+            let btc_height = Uint64::from(btc_tip.height);
+            let btc_timestamp = Uint64::from(btc_tip.header.time as u64);
             let saved_at_btc_epoch = bq.current_epoch()?;
             let stored_data = StoredData {
                 data: data.clone(),
                 btc_height,
-                btc_timestamp: btc_timestamp as u64,
-                saved_at_btc_epoch: saved_at_btc_epoch.u64(),
+                btc_timestamp,
+                saved_at_btc_epoch,
             };
 
             STORED_DATA.save(deps.storage, hash_string_ref, &stored_data)?;
 
             Ok(Response::default()
                 .add_attribute("data", data)
-                .add_attribute("btc_height", btc_height.to_string())
-                .add_attribute("btc_timestamp", btc_timestamp.to_string())
+                .add_attribute("btc_height", btc_height)
+                .add_attribute("btc_timestamp", btc_timestamp)
                 .add_attribute("saved_at_btc_epoch", saved_at_btc_epoch)
                 .add_attribute("hash_string", hash_string))
         }
@@ -81,8 +82,8 @@ pub fn query(deps: Deps<BabylonQuery>, _env: Env, msg: QueryMsg) -> StdResult<Bi
 
             // Realistically there can be only one error here i.e there is no finalized epoch
             let latest_finalized_epoch = match latest_finalized_epoch_info_res {
-                Ok(epoch_info) => epoch_info.epoch_number,
-                Err(_) => 0,
+                Ok(epoch_info) => Uint64::from(epoch_info.epoch_number),
+                Err(_) => Uint64::zero(),
             };
 
             to_json_binary(&DataResponse {
