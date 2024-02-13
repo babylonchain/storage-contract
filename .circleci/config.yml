@@ -3,7 +3,7 @@
 version: 2.1
 
 jobs:
-  local-build-test:
+  local_build_test:
     docker:
       - image: circleci/rust:latest
     steps:
@@ -26,7 +26,7 @@ jobs:
           command: |
             cargo test
 
-  wasm-build-check-integration:
+  wasm_build_check_integration:
     docker:
       - image: circleci/rust:latest
     steps:
@@ -160,6 +160,12 @@ jobs:
 # Orchestrate jobs using workflows
 # See: https://circleci.com/docs/configuration-reference/#workflows
 workflows:
+  local-tests:
+    jobs:
+      - local_build_test
+  wasm-tests:
+    jobs:
+      - wasm_build_check_integration
   deploy:
     jobs:
       - build_and_upload_contracts:
