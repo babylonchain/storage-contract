@@ -1,8 +1,12 @@
 # Changelog
 
-## [Unreleased](https://github.com/babylonchain/storage-contract/tree/HEAD)
+## [v0.2.0](https://github.com/babylonchain/storage-contract/tree/v0.2.0) (2024-02-13)
 
-[Full Changelog](https://github.com/babylonchain/storage-contract/compare/v0.1.1...HEAD)
+[Full Changelog](https://github.com/babylonchain/storage-contract/compare/v0.1.1...v0.2.0)
+
+**Merged pull requests:**
+
+- Small polish [\#4](https://github.com/babylonchain/storage-contract/pull/4) ([llllllluc](https://github.com/llllllluc))
 
 ## [v0.1.1](https://github.com/babylonchain/storage-contract/tree/v0.1.1) (2024-01-24)
 
