@@ -36,14 +36,29 @@ jobs:
           name: Set Rust stable as default toolchain
           command: rustup default stable
       - run:
-          name: Build optimised Wasm binary
-          command: ./scripts/optimizer-ci.sh
+          # We cannot mount local folders, see https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+          name: Prepare volume with source code
+          command: |
+            # create a dummy container which will hold a volume with config
+            docker create -v /code --name with_code alpine /bin/true
+            # copy a config file into this volume
+            docker cp ./Cargo.lock with_code:/code
+            docker cp ./Cargo.toml with_code:/code
+            docker cp ./src with_code:/code
+      - run:
+          name: Build contract
+          command: docker run --volumes-from with_code cosmwasm/optimizer:0.15.0 .
+      - run:
+          name: Export development contracts
+          command: |
+            # copy into host
+            docker cp with_code:/code/artifacts .
       - run:
           name: Install cosmwasm-check
           command: cargo install --debug --locked cosmwasm-check
       - run:
           name: Check the Wasm binary's validity against Wasm VM
-          command: cosmwasm-check /home/circleci/project/artifacts/storage_contract.wasm
+          command: cosmwasm-check ./artifacts/storage_contract.wasm
       - persist_to_workspace:
           root: /home/circleci/project/artifacts
           paths:
@@ -68,21 +83,34 @@ jobs:
           name: Set Rust stable as default toolchain
           command: rustup default stable
       - run:
-          name: Build optimised Wasm binary
-          command: ./scripts/optimizer-ci.sh
+          # We cannot mount local folders, see https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+          name: Prepare volume with source code
+          command: |
+            # create a dummy container which will hold a volume with config
+            docker create -v /code --name with_code alpine /bin/true
+            # copy a config file into this volume
+            docker cp ./Cargo.lock with_code:/code
+            docker cp ./Cargo.toml with_code:/code
+            docker cp ./src with_code:/code
       - run:
-          name: Create artifacts dir
-          command: mkdir -p /home/circleci/project/artifacts
-      - persist_to_workspace:
-          root: /home/circleci/project/artifacts
-          paths:
-            - storage_contract.wasm
-            - checksums.txt
+          name: Build contract
+          command: docker run --volumes-from with_code cosmwasm/optimizer:0.15.0 .
+      - run:
+          name: Export development contracts
+          command: |
+            # copy into host
+            docker cp with_code:/code/artifacts .
       - run:
           name: Show data
           command: |
             ls -l artifacts
             cat artifacts/checksums.txt
+      - run:
+          name: Install cosmwasm-check
+          command: cargo install --debug --locked cosmwasm-check
+      - run:
+          name: Check the Wasm binary's validity against Wasm VM
+          command: cosmwasm-check ./artifacts/storage_contract.wasm
       - run:
           name: Publish artifacts on GitHub
           command: |
