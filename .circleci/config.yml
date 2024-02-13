@@ -58,7 +58,7 @@ jobs:
           command: cargo install --debug --locked cosmwasm-check
       - run:
           name: Check the Wasm binary's validity against Wasm VM
-          command: cosmwasm-check ./artifacts/storage_contract.wasm
+          command: cosmwasm-check --available-capabilities iterator,babylon ./artifacts/storage_contract.wasm
       - persist_to_workspace:
           root: /home/circleci/project/artifacts
           paths:
@@ -110,7 +110,7 @@ jobs:
           command: cargo install --debug --locked cosmwasm-check
       - run:
           name: Check the Wasm binary's validity against Wasm VM
-          command: cosmwasm-check ./artifacts/storage_contract.wasm
+          command: cosmwasm-check --available-capabilities iterator,babylon ./artifacts/storage_contract.wasm
       - run:
           name: Publish artifacts on GitHub
           command: |
