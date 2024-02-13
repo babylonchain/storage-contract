@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "QueryMsg",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": [
+        "query_data"
+      ],
+      "properties": {
+        "query_data": {
+          "$ref": "#/definitions/QueryDataMsg"
+        }
+      },
+      "additionalProperties": false
+    }
+  ],
+  "definitions": {
+    "QueryDataMsg": {
+      "type": "object",
+      "required": [
+        "data_hash"
+      ],
+      "properties": {
+        "data_hash": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

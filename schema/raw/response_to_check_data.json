@@ -1,0 +1,38 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CheckDataResponse",
+  "type": "object",
+  "required": [
+    "finalized",
+    "height",
+    "latest_finalized_epoch",
+    "save_epoch",
+    "timestamp"
+  ],
+  "properties": {
+    "finalized": {
+      "type": "boolean"
+    },
+    "height": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "latest_finalized_epoch": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "save_epoch": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    },
+    "timestamp": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0.0
+    }
+  },
+  "additionalProperties": false
+}
