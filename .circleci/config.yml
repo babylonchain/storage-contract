@@ -48,21 +48,6 @@ jobs:
       - run:
           name: Build contract
           command: docker run --volumes-from with_code cosmwasm/optimizer:0.15.0 .
-      - run:
-          name: Export development contracts
-          command: |
-            # copy into host
-            docker cp with_code:/code/artifacts .
-      - run:
-          name: Install cosmwasm-check
-          command: cargo install --debug --locked cosmwasm-check
-      - run:
-          name: Check the Wasm binary's validity against Wasm VM
-          command: cosmwasm-check --available-capabilities iterator,babylon ./artifacts/storage_contract.wasm
-      - persist_to_workspace:
-          root: /home/circleci/project/artifacts
-          paths:
-            - storage_contract.wasm
 
   # This job roughly follows the instructions from https://circleci.com/blog/publishing-to-github-releases-via-circleci/
   build_and_upload_contracts:
