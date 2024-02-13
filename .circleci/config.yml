@@ -1,0 +1,167 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/configuration-reference
+version: 2.1
+
+jobs:
+  local_build_test:
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
+      - run:
+          name: Set up Rust environment
+          command: |
+            rustup default nightly
+            rustup component add rustfmt clippy
+      - run:
+          name: Build Babylon contract
+          command: |
+            cargo build
+      - run:
+          name: Test generating schema
+          command: |
+            cargo schema
+      - run:
+          name: Check formats and run unit tests
+          command: |
+            cargo test
+
+  wasm_build_check_integration:
+    docker:
+      - image: circleci/rust:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Set Rust stable as default toolchain
+          command: rustup default stable
+      - run:
+          # We cannot mount local folders, see https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+          name: Prepare volume with source code
+          command: |
+            # create a dummy container which will hold a volume with config
+            docker create -v /code --name with_code alpine /bin/true
+            # copy a config file into this volume
+            docker cp ./Cargo.lock with_code:/code
+            docker cp ./Cargo.toml with_code:/code
+            docker cp ./src with_code:/code
+      - run:
+          name: Build optimized contract
+          command: docker run --volumes-from with_code cosmwasm/optimizer:0.15.0 .
+
+  # This job roughly follows the instructions from https://circleci.com/blog/publishing-to-github-releases-via-circleci/
+  build_and_upload_contract:
+    docker:
+      - image: circleci/rust:latest
+    working_directory: /home/circleci/project
+    steps:
+      - checkout:
+          path: /home/circleci/project
+      - setup_remote_docker
+      - run:
+          name: Make temporary bin
+          command: mkdir -p /tmp/bin
+      - run:
+          name: Install ghr
+          command: wget https://github.com/tcnksm/ghr/releases/download/v0.14.0/ghr_v0.14.0_linux_amd64.tar.gz -O - | tar -zxvf - -C /tmp/bin --wildcards --strip-components 1 */ghr
+      - run:
+          name: Set Rust stable as default toolchain
+          command: rustup default stable
+      - run:
+          # We cannot mount local folders, see https://circleci.com/docs/2.0/building-docker-images/#mounting-folders
+          name: Prepare volume with source code
+          command: |
+            # create a dummy container which will hold a volume with config
+            docker create -v /code --name with_code alpine /bin/true
+            # copy a config file into this volume
+            docker cp ./Cargo.lock with_code:/code
+            docker cp ./Cargo.toml with_code:/code
+            docker cp ./src with_code:/code
+      - run:
+          name: Build optimized contract
+          command: docker run --volumes-from with_code cosmwasm/optimizer:0.15.0 .
+      - run:
+          name: Export contract
+          command: |
+            # copy into host
+            docker cp with_code:/code/artifacts .
+      - run:
+          name: Show data
+          command: |
+            ls -l artifacts
+            cat artifacts/checksums.txt
+      - run:
+          name: Install cosmwasm-check
+          command: cargo install --debug --locked cosmwasm-check
+      - run:
+          name: Check the Wasm binary's validity against Wasm VM
+          command: cosmwasm-check --available-capabilities iterator,babylon ./artifacts/storage_contract.wasm
+      - run:
+          name: Publish artifacts on GitHub
+          command: |
+            TAG="$CIRCLE_TAG"
+            TITLE="$TAG"
+            BODY="Attached there are some build artifacts generated at this tag. Those are for development purposes only! Please use crates.io to find the packages of this release."
+            /tmp/bin/ghr -t "$GITHUB_TOKEN" \
+              -u "$CIRCLE_PROJECT_USERNAME" -r "$CIRCLE_PROJECT_REPONAME" \
+              -c "$CIRCLE_SHA1" \
+              -n "$TITLE" -b "$BODY" \
+              -replace \
+              "$TAG" ./artifacts/
+
+  build_and_upload_schemas:
+    docker:
+      - image: rust:1.67.0
+    working_directory: /home/circleci/project
+    steps:
+      - checkout:
+          path: /home/circleci/project
+      - run:
+          name: Make temporary bin
+          command: mkdir -p /tmp/bin
+      - run:
+          name: Install ghr
+          command: wget https://github.com/tcnksm/ghr/releases/download/v0.14.0/ghr_v0.14.0_linux_amd64.tar.gz -O - | tar -zxvf - -C /tmp/bin --wildcards --strip-components 1 */ghr
+      - run:
+          name: Build and run schema generator
+          command: |
+            cargo schema
+      - run:
+          name: Show data
+          command: ls -l ./schema
+      - run:
+          name: Publish schemas on GitHub
+          command: |
+            TAG="$CIRCLE_TAG"
+            TITLE="$TAG"
+            BODY="Attached there are some schemas and build artifacts generated at this tag. Those are for development purposes only! Please use crates.io to find the packages of this release."
+            /tmp/bin/ghr -t "$GITHUB_TOKEN" \
+              -u "$CIRCLE_PROJECT_USERNAME" -r "$CIRCLE_PROJECT_REPONAME" \
+              -c "$CIRCLE_SHA1" \
+              -n "$TITLE" -b "$BODY" \
+              -replace \
+              "$TAG" ./schema/
+
+# Orchestrate jobs using workflows
+# See: https://circleci.com/docs/configuration-reference/#workflows
+workflows:
+  local-tests:
+    jobs:
+      - local_build_test
+  wasm-tests:
+    jobs:
+      - wasm_build_check_integration
+  deploy:
+    jobs:
+      - build_and_upload_contract:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
+      - build_and_upload_schemas:
+          filters:
+            tags:
+              only: /^v[0-9]+\.[0-9]+\.[0-9]+.*/
+            branches:
+              ignore: /.*/
