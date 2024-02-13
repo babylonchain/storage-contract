@@ -2,7 +2,6 @@
 # See: https://circleci.com/docs/configuration-reference
 version: 2.1
 
-
 jobs:
   local-build-test:
     docker:
@@ -34,22 +33,17 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Set Rust nightly as default toolchain
-          command: |
-            rustup default nightly
+          name: Set Rust stable as default toolchain
+          command: rustup default stable
       - run:
           name: Build optimised Wasm binary
-          command: |
-            cargo install cargo-run-script
-            cargo run-script optimize
+          command: ./scripts/optimizer-ci.sh
       - run:
           name: Install cosmwasm-check
-          command: |
-            cargo install cosmwasm-check
+          command: cargo install --debug --locked cosmwasm-check
       - run:
           name: Check the Wasm binary's validity against Wasm VM
-          command: |
-            cosmwasm-check /home/circleci/project/artifacts/storage_contract.wasm
+          command: cosmwasm-check /home/circleci/project/artifacts/storage_contract.wasm
       - persist_to_workspace:
           root: /home/circleci/project/artifacts
           paths:
@@ -71,14 +65,14 @@ jobs:
           name: Install ghr
           command: wget https://github.com/tcnksm/ghr/releases/download/v0.14.0/ghr_v0.14.0_linux_amd64.tar.gz -O - | tar -zxvf - -C /tmp/bin --wildcards --strip-components 1 */ghr
       - run:
-          name: Set Rust nightly as default toolchain
-          command: |
-            rustup default nightly
+          name: Set Rust stable as default toolchain
+          command: rustup default stable
       - run:
           name: Build optimised Wasm binary
-          command: |
-            cargo install cargo-run-script
-            cargo run-script optimize
+          command: ./scripts/optimizer-ci.sh
+      - run:
+          name: Create artifacts dir
+          command: mkdir -p /home/circleci/project/artifacts
       - persist_to_workspace:
           root: /home/circleci/project/artifacts
           paths:
